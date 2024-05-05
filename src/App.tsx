@@ -2,14 +2,34 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
+import WebAssemblyWrapper from './wasm/adder_wasm.js';
+import WebAssemblyBinary from './wasm/adder_wasm.wasm?url';
+
+const wasmModuleInstance = WebAssemblyWrapper({
+  locateFile: () =>{
+    return WebAssemblyBinary;
+  }
+})
+
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
+  const [numbers, setNumbers] = useState({a:0, b:0});
+  const [result, setResult] = useState(0);
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
     setGreetMsg(await invoke("greet", { name }));
+  }
+
+  function handleClick(): void {
+    wasmModuleInstance.then((core:any)=>{
+      console.log("a",numbers.a);
+      console.log("b",numbers.b);
+      const res = core._adder(numbers.a, numbers.b);
+      setResult(res);
+    })
   }
 
   return (
@@ -46,6 +66,20 @@ function App() {
       </form>
 
       <p>{greetMsg}</p>
+
+      <div>
+        <input
+          type="number"
+          onChange={e=>setNumbers({...numbers, a: parseInt(e.currentTarget.value)})}
+        />
+        <input
+          type="number"
+          onChange={e=>setNumbers({...numbers, b: parseInt(e.currentTarget.value)})}
+        />
+        <button onClick={() => handleClick()}></button>
+        <br />
+        <p>Result: {result}</p>
+      </div>
     </div>
   );
 }
