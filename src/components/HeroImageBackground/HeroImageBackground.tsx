@@ -1,6 +1,7 @@
 import { Title, Text, Container, Button, Overlay } from '@mantine/core';
 import classes from './HeroImageBackground.module.css';
 import { Link } from 'react-router-dom';
+import { DropzoneButton } from '../DropzoneButton/DropzoneButton';
 
 export function HeroImageBackground() {
   return (
@@ -18,11 +19,7 @@ export function HeroImageBackground() {
           </Text>
         </Container>
 
-        <div className={classes.controls}>
-          <Button component={Link} to="/" className={classes.control} variant="white" size="lg">
-            Botón
-          </Button>
-        </div>
+        <DropzoneButton></DropzoneButton>
       </div>
     </div>
   );
