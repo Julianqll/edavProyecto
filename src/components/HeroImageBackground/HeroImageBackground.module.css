@@ -6,6 +6,7 @@
     padding-top: rem(180px);
     padding-bottom: rem(130px);
     background-size: cover;
+    background: var(--mantine-color-gray-9);
     background-position: center;
     height: 100vh; /* Full height */
     width: 100vw; /* Full width */

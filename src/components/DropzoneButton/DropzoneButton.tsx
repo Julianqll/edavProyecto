@@ -35,11 +35,12 @@ export function DropzoneButton() {
               />
             </Dropzone.Reject>
             <Dropzone.Idle>
-              <IconCloudUpload style={{ width: rem(50), height: rem(50) }} stroke={1.5} />
+              <IconCloudUpload style={{ width: rem(50), height: rem(50) }} stroke={1.5} 
+              color="var(--mantine-color-blue-filled)"/>
             </Dropzone.Idle>
           </Group>
 
-          <Text ta="center" fw={700} fz="lg" mt="xl">
+          <Text ta="center" fw={700} fz="lg" mt="xl" c="white">
             <Dropzone.Accept>Drop files here</Dropzone.Accept>
             <Dropzone.Reject>Pdf file less than 30mb</Dropzone.Reject>
             <Dropzone.Idle>Upload resume</Dropzone.Idle>
