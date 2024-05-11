@@ -27,8 +27,8 @@ export function PruebaWASM() {
     wasmModuleInstance.then((core:any)=>{
       console.log("a",numbers.a);
       console.log("b",numbers.b);
-      const res = core._adder(numbers.a, numbers.b);
-      setResult(res);
+      const res = core._create();
+      console.log(res);
     })
   }
 
