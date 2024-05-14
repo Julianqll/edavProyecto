@@ -1,6 +1,7 @@
 #include <emscripten.h>
 using namespace std;
 #include <iostream>
+#include <sstream>
 #include <vector> 
 extern "C"
 {
@@ -11,7 +12,7 @@ class BTreeNode{
   vector<BTreeNode*> children;
   public:
     BTreeNode(int _t, bool _leaf);
-    void traverse();
+    void traverse(stringstream &result);
     void splitChild(int i, BTreeNode* y);
     void insertNonFull(int k);  
 
@@ -27,10 +28,17 @@ class Btree{
       root = NULL;
       t = _t;
     }
-    void traverse(){
-      if(root != NULL)
-        root->traverse();
+void traverse(char* result, size_t size) {
+    if (root != NULL) {
+        stringstream ss;
+        root->traverse(ss);
+        string str = ss.str();
+        size_t len = str.copy(result, size - 1);
+        result[len] = '\0'; // Agregar el terminador nulo
+    } else {
+        result[0] = '\0'; // Si el árbol está vacío, el resultado es una cadena vacía
     }
+}
     void insert(int k);
     bool search(int k);
 };
@@ -42,18 +50,23 @@ BTreeNode::BTreeNode(int _t, bool _leaf){
   children.resize(2*t);
 }
 
-void BTreeNode::traverse(){
-  int i;
-  for(i = 0; i < n; i++)
-    {
-      if(leaf == false)
-        children[i]->traverse();
-      cout << " " << keys[i];
+void BTreeNode::traverse(stringstream &ss) {
+    int i;
+    for (i = 0; i < n; i++) {
+        if (!leaf)
+            children[i]->traverse(ss);
+        ss << " " << keys[i];
     }
-  if(leaf == false)
-    children[i]->traverse();
+    if (!leaf)
+        children[i]->traverse(ss);
 }
 
+char *traverseTree(Btree *t) {
+    const size_t bufferSize = 1024; // Tamaño máximo del buffer
+    char *buffer = new char[bufferSize];
+    t->traverse(buffer, bufferSize);
+    return buffer;
+}
 void BTreeNode::insertNonFull(int k)
 {
   int i = n-1;
@@ -151,25 +164,71 @@ bool Btree::search(int k){
   return false;
 }
 
-Btree t(4);
+Btree* t;
 
 EMSCRIPTEN_KEEPALIVE
-bool create() {
-
-  t.insert(70);
-  t.insert(50);
-  t.insert(30);
-  t.insert(40);
-  t.insert(20);
-  t.insert(80);
-  t.insert(25);
-  t.insert(90);
-  t.insert(75);
-  t.insert(10);
-  t.insert(15);
-
-
-  return t.search(70);
-  
+bool createTree(int s){
+  try
+  {
+    t = new Btree(s);
+    return true;
+  }
+  catch(const std::exception& e)
+  {
+    return false;
+  }  
 }
+
+EMSCRIPTEN_KEEPALIVE
+bool insertToTree(int v)
+{
+  try
+  {
+      t->insert(v);
+      return true;
+  }
+  catch(const std::exception& e)
+  {
+    return false;
+  } 
+}
+
+EMSCRIPTEN_KEEPALIVE
+char *traverseTreeF() {
+    char *result = traverseTree(t); // Obtener la cadena desde la función traverseTree
+    size_t len = strlen(result); // Obtener la longitud de la cadena (sin incluir el carácter nulo)
+
+    // Asegurarse de que la cadena esté correctamente terminada con '\0'
+    char *resultWithNull = new char[len + 1];
+    memcpy(resultWithNull, result, len);
+    resultWithNull[len] = '\0';
+
+    delete[] result; // Liberar la memoria de la cadena original
+
+    return resultWithNull; // Devolver la cadena terminada con '\0'
+}
+EMSCRIPTEN_KEEPALIVE
+string hola(){
+  return "hola";
+}
+
+//EMSCRIPTEN_KEEPALIVE
+//bool create() {
+//
+//  t.insert(70);
+//  t.insert(50);
+//  t.insert(30);
+//  t.insert(40);
+//  t.insert(20);
+//  t.insert(80);
+//  t.insert(25);
+//  t.insert(90);
+//  t.insert(75);
+//  t.insert(10);
+//  t.insert(15);
+//
+//
+//  return t.search(70);
+//  
+//}
 }
