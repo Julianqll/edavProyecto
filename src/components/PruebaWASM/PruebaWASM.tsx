@@ -13,24 +13,30 @@ const wasmModuleInstance = WebAssemblyWrapper({
 
 
 export function PruebaWASM() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
-  const [numbers, setNumbers] = useState({a:0, b:0});
-  const [result, setResult] = useState(0);
+  const [order, setOrder] = useState(0);
+  const [value, setValue] = useState(0);
+  const [created, setCreated] = useState(false);
+  const [traverse, setTraverse] = useState("");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name }));
-  }
-
-  function handleClick(): void {
+  function handleOrder(): void {
     wasmModuleInstance.then((core:any)=>{
-      console.log("a",numbers.a);
-      console.log("b",numbers.b);
-      const res = core._adder(numbers.a, numbers.b);
-      setResult(res);
+      const res = core._createTree(order);
+      setCreated(res);
     })
   }
+
+  function handleInsert(): void {
+    wasmModuleInstance.then((core: any) => {
+        const res = core._insertToTree(value);
+        console.log(res);
+        if (res) {
+            const resultPtr = core._traverseTreeF();
+            const resultStr = core.UTF8ToString(resultPtr); // Convertir el puntero a cadena UTF-8
+            setTraverse(resultStr);
+        }
+    })
+}
+
 
   return (
     <div className="container">
@@ -50,36 +56,39 @@ export function PruebaWASM() {
 
       <p>Click on the Tauri, Vite, and React logos to learn more.</p>
 
-      <form
+      <div
         className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
       >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-
-      <p>{greetMsg}</p>
-
-      <div>
-        <input
-          type="number"
-          onChange={e=>setNumbers({...numbers, a: parseInt(e.currentTarget.value)})}
-        />
-        <input
-          type="number"
-          onChange={e=>setNumbers({...numbers, b: parseInt(e.currentTarget.value)})}
-        />
-        <button onClick={() => handleClick()}></button>
-        <br />
-        <p>Result: {result}</p>
+        {created ?          
+        <p>Btree creado!</p>:
+          <>
+          <p>Ingrese el orden</p>
+            <input
+            type="number"
+            onChange={e=>setOrder( parseInt(e.currentTarget.value))}
+          />
+          <button onClick={() => handleOrder()}></button>
+          </>         
+      }
       </div>
+
+     
+      {created ? 
+      <>
+        <div>
+        <p>Añada un valor</p>
+            <input
+            type="number"
+            onChange={e=>setValue(parseInt(e.currentTarget.value))}
+          />
+        <button onClick={() => handleInsert()}></button>
+        <br />
+        <p>Arbol: {traverse}</p>
+      </div>
+      </>
+      :
+      <></>
+      }
     </div>
   );
 }

@@ -6,16 +6,15 @@ import { DropzoneButton } from '../DropzoneButton/DropzoneButton';
 export function HeroImageBackground() {
   return (
     <div className={classes.wrapper}>
-      <Overlay color="#000" opacity={0.65} zIndex={1} />
 
       <div className={classes.inner}>
         <Title className={classes.title}>
-          Plantilla Inicial con Mantine
+          Proyecto final de EDAV
         </Title>
 
         <Container size={640}>
           <Text size="lg" className={classes.description}>
-            Este es un ejemplo inicial de la distribución de carpetas y archivos
+            Puede cargar un archivo con datos ya procesados o crear nuevos datos
           </Text>
         </Container>
 
