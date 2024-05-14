@@ -59,15 +59,15 @@ export function Menu() {
         direction="column"
         wrap="wrap"
       >
+
         <Text size="lg" className={classes.description}>
-          Método Andrés
+          Cantidad de datos
         </Text> 
         <NumberInput
           variant="filled"
           size="sm"
           radius="md"
           placeholder="Input placeholder"
-          label="Cantidad de datos"
           value={andres}
           onChange={setAndres}
         />
@@ -78,73 +78,7 @@ export function Menu() {
          Se demoró {pruebaAndres} milisegundos
         </Text> 
       </Flex>     
-      <div>
-        {created ?   
-          <Text size="lg" className={classes.description}>
-            ¡Btree creado!
-          </Text>       
-          :
-            <Flex
-              mih={50}
-              gap="md"
-              justify="center"
-              align="center"
-              direction="column"
-              wrap="wrap"
-            >
-              <Text size="lg" className={classes.description}>
-                Ingrese el orden
-              </Text> 
-              <NumberInput
-                variant="filled"
-                size="sm"
-                radius="md"
-                placeholder="Input placeholder"
-                value={order}
-                onChange={setOrder}
-              />
-              <Button size="md" radius="xl" onClick={() => handleOrder()}>
-                  Crear
-              </Button>
-            </Flex>     
-      }
-      </div>
 
-     
-      {created ? 
-      <Flex
-        mih={50}
-        gap="md"
-        justify="center"
-        align="center"
-        direction="column"
-        wrap="wrap"
-      >
-        <Text size="lg" className={classes.description}>
-          Añada un valor
-        </Text> 
-        <NumberInput
-          variant="filled"
-          size="sm"
-          radius="md"
-          placeholder="Input placeholder"
-          value={value}
-          onChange={setValue}
-        />
-        <Button size="md" radius="xl" onClick={() => handleInsert()}>
-          Insertar
-        </Button>
-        <br />
-        <Text size="lg" className={classes.description}>
-          Arbol:
-        </Text> 
-        <Text size="lg" className={classes.description}>
-          {traverse}
-        </Text> 
-      </Flex>  
-      :
-      <></>
-      }
     </div>
     </div>
   );
