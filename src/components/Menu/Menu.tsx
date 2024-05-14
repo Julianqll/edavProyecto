@@ -12,34 +12,27 @@ const wasmModuleInstance = WebAssemblyWrapper({
 
 
 export function Menu() {
-  const [order, setOrder] = useState<string | number>('');
+  const [cantidad, setCantidad] = useState<string | number>('');
+
   const [value, setValue] = useState<string | number>('');
-  const [andres, setAndres] = useState<string | number>('');
   const [pruebaAndres, setPruebaAndres] = useState(0);
   const [created, setCreated] = useState(false);
   const [traverse, setTraverse] = useState("");
 
-  function handleOrder(): void {
-    wasmModuleInstance.then((core:any)=>{
-      const res = core._createTree(order);
-      setCreated(res);
-    })
-  }
+  //function handleInsert(): void {
+  //  wasmModuleInstance.then((core: any) => {
+  //      const res = core._insertToTree(value);
+  //      if (res) {
+  //          const resultPtr = core._traverseTreeF();
+  //          const resultStr = core.UTF8ToString(resultPtr); // Convertir el puntero a cadena UTF-8
+  //          setTraverse(resultStr);
+  //      }
+  //  })
+  //}
 
-  function handleInsert(): void {
+  function handleCreation(): void {
     wasmModuleInstance.then((core: any) => {
-        const res = core._insertToTree(value);
-        if (res) {
-            const resultPtr = core._traverseTreeF();
-            const resultStr = core.UTF8ToString(resultPtr); // Convertir el puntero a cadena UTF-8
-            setTraverse(resultStr);
-        }
-    })
-  }
-
-  function handleAndres(): void {
-    wasmModuleInstance.then((core: any) => {
-        const res = core._pruebaAndres(andres);
+        const res = core._pruebaAndres(cantidad);
         setPruebaAndres(res);
     })
   }
@@ -67,11 +60,11 @@ export function Menu() {
           variant="filled"
           size="sm"
           radius="md"
-          placeholder="Input placeholder"
-          value={andres}
-          onChange={setAndres}
+          placeholder="Ingrese un número"
+          value={cantidad}
+          onChange={setCantidad}
         />
-        <Button size="md" radius="xl" onClick={() => handleAndres()}>
+        <Button size="md" radius="xl" onClick={() => handleCreation()}>
             Probar
         </Button>
         <Text size="lg" className={classes.description}>
