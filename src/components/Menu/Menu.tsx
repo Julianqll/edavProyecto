@@ -13,11 +13,10 @@ const wasmModuleInstance = WebAssemblyWrapper({
 
 export function Menu() {
   const [cantidad, setCantidad] = useState<string | number>('');
-
-  const [value, setValue] = useState<string | number>('');
-  const [pruebaAndres, setPruebaAndres] = useState(0);
+  const [tiempo, setTiempo] = useState(0);
   const [created, setCreated] = useState(false);
-  const [traverse, setTraverse] = useState("");
+  const [dniBusqueda, setDniBusqueda] = useState<string | number>('');
+  const [resultado, setResultado] = useState("");
 
   //function handleInsert(): void {
   //  wasmModuleInstance.then((core: any) => {
@@ -32,11 +31,19 @@ export function Menu() {
 
   function handleCreation(): void {
     wasmModuleInstance.then((core: any) => {
-        const res = core._pruebaAndres(cantidad);
-        setPruebaAndres(res);
+        const res = core._pruebaCreacion(cantidad);
+        setCreated(true);
+        setTiempo(res);
     })
   }
 
+  function handleBusqueda(): void {
+    wasmModuleInstance.then((core: any) => {
+        const res = core._pruebaBusqueda(dniBusqueda);
+        const resultStr = core.UTF8ToString(res); // Convertir el puntero a cadena UTF-8
+        setResultado(resultStr);
+    })
+  }
 
   return (
     <div className={classes.wrapper}>
@@ -67,10 +74,49 @@ export function Menu() {
         <Button size="md" radius="xl" onClick={() => handleCreation()}>
             Probar
         </Button>
-        <Text size="lg" className={classes.description}>
-         Se demoró {pruebaAndres} milisegundos
-        </Text> 
-      </Flex>     
+      </Flex>  
+
+        {created ? 
+              <Flex
+              mih={50}
+              gap="md"
+              justify="center"
+              align="center"
+              direction="column"
+              wrap="wrap"
+            >
+      
+              <Text size="lg" className={classes.description}>
+                Se demoró {tiempo} milisegundos en crear el arbol con {cantidad} datos.
+              </Text> 
+              <br />
+              <Text size="lg" className={classes.description}>
+                Numero de DNI a buscar
+              </Text> 
+              <NumberInput
+                variant="filled"
+                size="sm"
+                radius="md"
+                placeholder="Ingrese numero de DNI"
+                value={dniBusqueda}
+                onChange={setDniBusqueda}
+              />
+              <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
+                  Buscar
+              </Button>
+              <br />
+              {resultado != "" ? 
+              <Text size="lg" className={classes.description}>
+                Resultado de la busqueda: {resultado}
+              </Text> 
+              :
+              <></>
+              }
+
+            </Flex> 
+        :
+        <></>
+        }   
 
     </div>
     </div>

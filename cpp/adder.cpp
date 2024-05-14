@@ -4,90 +4,162 @@ using namespace std;
 #include <sstream>
 #include <chrono> 
 #include <vector> 
+#include <cstring> // Para strcpy y strlen
 extern "C"
 {
-  class NodoBTree {
+
+class Ciudadano {
 public:
-    bool esHoja;
-    vector<int> keys;
-    vector<NodoBTree*> hijos;
-    NodoBTree(bool _esHoja);
+    int dni;
+    string nombre;
+    string apellido;
+
+    Ciudadano(int _dni, const string& _nombre, const string& _apellido) : dni(_dni), nombre(_nombre), apellido(_apellido) {}
 };
 
-// Constructor de la clase NodoBTree
-NodoBTree::NodoBTree(bool _esHoja) {
-    esHoja = _esHoja;
-}
-
-// Definición de la clase BTree
-class BTree {
+class BTreeNode{
+    int t, n;
+    bool leaf;
+    vector<Ciudadano*> keys;
+    vector<BTreeNode*> children;
 public:
-    NodoBTree* raiz;
-    int orden;
-    BTree(int _orden);
-    void insertar(int llave);
-    void dividirHijo(NodoBTree* padre, int indiceHijo, NodoBTree* hijo);
-    void insertarNoLleno(NodoBTree* nodo, int llave);
+    BTreeNode(int _t, bool _leaf);
+    void traverse();
+    void splitChild(int i, BTreeNode* y);
+    void insertNonFull(Ciudadano* citizen);  
+    Ciudadano* search(int dni);
+    friend class Btree;
 };
 
-// Constructor de la clase BTree
-BTree::BTree(int _orden) {
-    raiz = nullptr;
-    orden = _orden;
+class Btree{
+    BTreeNode* root;
+    int t;
+public:
+    Btree(int _t)
+    {
+        root = NULL;
+        t = _t;
+    }
+    void traverse(){
+        if(root != NULL)
+            root->traverse();
+    }
+    void insert(Ciudadano* citizen);
+    Ciudadano* search(int dni);
+};
+
+BTreeNode::BTreeNode(int _t, bool _leaf){
+    t = _t;
+    leaf = _leaf;
+    keys.resize(2*t-1);
+    children.resize(2*t);
 }
 
-// Función para insertar una llave en el BTree
-void BTree::insertar(int llave) {
-    if (raiz == nullptr) {
-        raiz = new NodoBTree(true);
-        raiz->keys.push_back(llave);
-    } else {
-        if (raiz->keys.size() == (orden - 1)) { // Si la raíz está llena
-            NodoBTree* nuevaRaiz = new NodoBTree(false); // Crear una nueva raíz
-            nuevaRaiz->hijos.push_back(raiz); // La raíz actual se convierte en hijo de la nueva raíz
-            dividirHijo(nuevaRaiz, 0, raiz); // Dividir el hijo (antigua raíz)
-            raiz = nuevaRaiz; // Establecer la nueva raíz
+void BTreeNode::traverse(){
+    int i;
+    for(i = 0; i < n; i++)
+    {
+        if(!leaf)
+            children[i]->traverse();
+        cout << " " << keys[i]->dni;
+    }
+    if(!leaf)
+        children[i]->traverse();
+}
+
+void BTreeNode::insertNonFull(Ciudadano* citizen)
+{
+    int i = n-1;
+    if(leaf)
+    {
+        while(i >= 0 && keys[i]->dni > citizen->dni)
+        {
+            keys[i+1] = keys[i];
+            i--;
         }
-        insertarNoLleno(raiz, llave); // Llamar a la función auxiliar para insertar en un nodo no lleno
+        keys[i+1] = citizen;
+        n = n+1;
+    }
+    else{
+        while(i >= 0 && keys[i]->dni > citizen->dni)
+            i--;
+        if(children[i+1]->n == 2*t-1)
+        {
+            splitChild(i+1, children[i+1]);
+            if(keys[i+1]->dni < citizen->dni)
+                i++;
+        }
+        children[i+1]->insertNonFull(citizen);
     }
 }
 
-// Función auxiliar para insertar en un nodo que no está lleno
-void BTree::insertarNoLleno(NodoBTree* nodo, int llave) {
-    int indice = nodo->keys.size() - 1; // Obtener el índice de la última llave
-    if (nodo->esHoja) { // Si el nodo es una hoja
-        // Insertar la llave en la posición adecuada para mantener el orden
-        while (indice >= 0 && llave < nodo->keys[indice]) {
-            nodo->keys[indice + 1] = nodo->keys[indice];
-            indice--;
+void BTreeNode::splitChild(int i, BTreeNode* y)
+{
+    BTreeNode* z = new BTreeNode(y->t, y->leaf);
+    z->n = t-1; 
+    for(int j = 0; j < t-1; j++)
+        z->keys[j] = y->keys[j+t];
+    if(!y->leaf)
+    {
+        for(int j = 0; j < t; j++)
+            z->children[j] = y->children[j+t];
+    }
+    y->n = t-1;
+    for(int j = n; j >= i+1; j--)
+        children[j+1] = children[j];
+    children[i+1] = z;
+    for(int j = n-1; j >= i; j--)
+        keys[j+1] = keys[j];
+    keys[i] = y->keys[t-1];
+    n = n+1;
+}
+
+void Btree::insert(Ciudadano* citizen)
+{
+    if(root == NULL)
+    {
+        root = new BTreeNode(t, true);
+        root->keys[0] = citizen;
+        root->n = 1;
+    }
+    else
+    {
+        if(root->n == 2*t-1)
+        {
+            BTreeNode* s = new BTreeNode(t, false);
+            s->children[0] = root;
+            s->splitChild(0, root);
+            int i = 0;
+            if(s->keys[0]->dni < citizen->dni)
+                i++;
+            s->children[i]->insertNonFull(citizen);
+            root = s;
         }
-        nodo->keys[indice + 1] = llave;
-    } else { // Si el nodo es interno
-        while (indice >= 0 && llave < nodo->keys[indice]) {
-            indice--;
+        else
+        {
+            root->insertNonFull(citizen);
         }
-        indice++; // Obtener el índice del hijo apropiado
-        if (nodo->hijos[indice]->keys.size() == (orden - 1)) { // Si el hijo está lleno
-            dividirHijo(nodo, indice, nodo->hijos[indice]); // Dividir el hijo
-            if (llave > nodo->keys[indice]) {
-                indice++;
-            }
-        }
-        insertarNoLleno(nodo->hijos[indice], llave); // Insertar en el hijo adecuado
     }
 }
 
-// Función para dividir un hijo de un nodo dado
-void BTree::dividirHijo(NodoBTree* padre, int indiceHijo, NodoBTree* hijo) {
-    NodoBTree* nuevoHijo = new NodoBTree(hijo->esHoja);
-    nuevoHijo->keys.assign(hijo->keys.begin() + (orden / 2) + 1, hijo->keys.end()); // Mover la mitad superior de las llaves al nuevo hijo
-    hijo->keys.resize(orden / 2); // Redimensionar el hijo original
-    if (!hijo->esHoja) { // Si el hijo no es una hoja, también debemos mover los punteros
-        nuevoHijo->hijos.assign(hijo->hijos.begin() + (orden / 2) + 1, hijo->hijos.end());
-        hijo->hijos.resize(orden / 2 + 1);
+Ciudadano* BTreeNode::search(int dni){
+    int i = 0;
+    while(i < n && dni > keys[i]->dni)
+        i++;
+    if(i < n && dni == keys[i]->dni)
+        return keys[i];
+    if(leaf)
+        return nullptr;
+    return children[i]->search(dni);
+}
+
+Ciudadano* Btree::search(int dni){
+    if(root == NULL)
+    {
+        cout << "Tree is empty" << endl;
+        return nullptr;
     }
-    padre->keys.insert(padre->keys.begin() + indiceHijo, hijo->keys[orden / 2]); // Insertar la llave promovida en el padre
-    padre->hijos.insert(padre->hijos.begin() + indiceHijo + 1, nuevoHijo); // Insertar el nuevo hijo en el padre
+    return root->search(dni);
 }
 
 
@@ -162,22 +234,70 @@ void BTree::dividirHijo(NodoBTree* padre, int indiceHijo, NodoBTree* hijo) {
 //
 //    return resultWithNull; // Devolver la cadena terminada con '\0'
 //}
+//EMSCRIPTEN_KEEPALIVE
+//long long pruebaAndres(int n){
+//    BTree arbol(6); // Crear un BTree con un orden de 6
+//    
+//    auto start = std::chrono::high_resolution_clock::now(); // Obtener el tiempo de inicio
+//
+//    
+//    for(int i=0;i<n;i++)
+//    {
+//        arbol.insertar(10);
+//    }
+//    
+//    auto stop = std::chrono::high_resolution_clock::now(); // Obtener el tiempo de finalización
+//    auto duration = duration_cast<std::chrono::milliseconds>(stop - start); // Calcular la duración en milisegundos
+//
+//    return duration.count();
+//}
+
+Btree t(70);
+
+
 EMSCRIPTEN_KEEPALIVE
-long long pruebaAndres(int n){
-    BTree arbol(6); // Crear un BTree con un orden de 6
-    
+long long pruebaCreacion(int numElements){
+
     auto start = std::chrono::high_resolution_clock::now(); // Obtener el tiempo de inicio
 
-    
-    for(int i=0;i<n;i++)
-    {
-        arbol.insertar(10);
+
+    for(int i = 0; i < numElements; i++){
+        int dni = i;
+        string nombre = "Julian #" + std::to_string(i);
+        string apellido = "Quispe";
+
+        t.insert(new Ciudadano(dni, nombre, apellido));
     }
-    
+
     auto stop = std::chrono::high_resolution_clock::now(); // Obtener el tiempo de finalización
-    auto duration = duration_cast<std::chrono::milliseconds>(stop - start); // Calcular la duración en milisegundos
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start); // Calcular la duración en milisegundos
 
     return duration.count();
+    // Traverse the tree
+    //cout << "El recorrido del arbol es: " << endl;
+    //t.traverse();
+    //cout << endl;
+
+}
+
+EMSCRIPTEN_KEEPALIVE
+char* pruebaBusqueda(int dniToSearch) {
+    // Search by DNI
+    char* result;
+    Ciudadano* foundCitizen = t.search(dniToSearch);
+    if (foundCitizen != nullptr) {
+        // Construir la cadena resultante
+        string tempResult = "Ciudadano encontrado - Nombre: " + foundCitizen->nombre + ", Apellido: " + foundCitizen->apellido;
+        result = new char[tempResult.length() + 1]; // +1 para el carácter nulo
+        strcpy(result, tempResult.c_str()); // Copiar la cadena de string a char*
+    } else {
+        result = new char[18]; // "Ciudadano no encontrado" tiene 18 caracteres
+        strcpy(result, "Ciudadano no encontrado");
+    }
+
+    // Cleanup memory
+    delete foundCitizen;
+    return result;
 }
 
 }
