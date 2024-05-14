@@ -1,7 +1,5 @@
 import { useState } from "react";
 import reactLogo from "../../assets/react.svg";
-import { invoke } from "@tauri-apps/api/tauri";
-import "../../App.css";
 import WebAssemblyWrapper from '../../wasm/adder_wasm.js';
 import WebAssemblyBinary from '../../wasm/adder_wasm.wasm?url';
 

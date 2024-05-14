@@ -11,7 +11,7 @@ function App() {
       <MantineProvider theme={theme}>
         <Routes>
           <Route path="/" element={<HomePage/>}/>
-          <Route path="/prueba" element={<PruebaWASMPage/>}/>
+          <Route path="/menu" element={<PruebaWASMPage/>}/>
         </Routes>
       </MantineProvider>
     </BrowserRouter>
