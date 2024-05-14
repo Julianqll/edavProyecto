@@ -1,6 +1,5 @@
-import { Title, Text, Container, Button } from '@mantine/core';
+import { Title, Text, Container } from '@mantine/core';
 import classes from './HeroImageBackground.module.css';
-import { Link } from 'react-router-dom';
 import { DropzoneButton } from '../DropzoneButton/DropzoneButton';
 
 export function HeroImageBackground() {

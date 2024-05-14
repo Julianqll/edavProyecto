@@ -3,7 +3,7 @@ import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HomePage } from "./pages/HomePage";
-import { PruebaWASMPage } from "./pages/PruebaWASMPage";
+import { MenuPage } from "./pages/MenuPage";
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
       <MantineProvider theme={theme}>
         <Routes>
           <Route path="/" element={<HomePage/>}/>
-          <Route path="/menu" element={<PruebaWASMPage/>}/>
+          <Route path="/menu" element={<MenuPage/>}/>
         </Routes>
       </MantineProvider>
     </BrowserRouter>
