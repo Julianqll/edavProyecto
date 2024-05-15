@@ -252,7 +252,7 @@ Ciudadano* Btree::search(int dni){
 //    return duration.count();
 //}
 
-Btree t(70);
+Btree t(15);
 
 
 EMSCRIPTEN_KEEPALIVE
