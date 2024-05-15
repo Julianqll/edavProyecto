@@ -3,6 +3,7 @@ import WebAssemblyWrapper from '../../wasm/adder_wasm.js';
 import WebAssemblyBinary from '../../wasm/adder_wasm.wasm?url';
 import { Title, Text, Button, Flex, NumberInput } from '@mantine/core';
 import classes from './Menu.module.css';
+import { Link } from "react-router-dom";
 
 const wasmModuleInstance = WebAssemblyWrapper({
   locateFile: () =>{
@@ -51,31 +52,34 @@ export function Menu() {
       <Title className={classes.title}>
         Panel de menu
       </Title>
-      <Flex
-        mih={50}
-        gap="md"
-        justify="center"
-        align="center"
-        direction="column"
-        wrap="wrap"
-      >
-
-        <Text size="lg" className={classes.description}>
-          Cantidad de datos
-        </Text> 
-        <NumberInput
-          variant="filled"
-          size="sm"
-          radius="md"
-          placeholder="Ingrese un número"
-          value={cantidad}
-          onChange={setCantidad}
-        />
-        <Button size="md" radius="xl" onClick={() => handleCreation()}>
-            Probar
-        </Button>
-      </Flex>  
-
+        {!created ? 
+         <Flex
+         mih={50}
+         gap="md"
+         justify="center"
+         align="center"
+         direction="column"
+         wrap="wrap"
+       >
+ 
+         <Text size="lg" className={classes.description}>
+           Cantidad de datos
+         </Text> 
+         <NumberInput
+           variant="filled"
+           size="sm"
+           radius="md"
+           placeholder="Ingrese un número"
+           value={cantidad}
+           onChange={setCantidad}
+         />
+         <Button size="md" radius="xl" onClick={() => handleCreation()}>
+             Crear
+         </Button>
+       </Flex>  
+        :
+        <></>
+        }
         {created ? 
               <Flex
               mih={50}
@@ -117,7 +121,9 @@ export function Menu() {
         :
         <></>
         }   
-
+        <Button mt={50} size="md" radius="xl" component={Link} to="/">
+          Volver
+        </Button>
     </div>
     </div>
   );
