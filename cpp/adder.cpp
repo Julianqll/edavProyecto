@@ -5,6 +5,7 @@ using namespace std;
 #include <chrono> 
 #include <vector> 
 #include <cstring> // Para strcpy y strlen
+#include <fstream>
 extern "C"
 {
 
@@ -28,6 +29,8 @@ public:
     void splitChild(int i, BTreeNode* y);
     void insertNonFull(Ciudadano* citizen);  
     Ciudadano* search(int dni);
+    void serialize(fstream& fout);
+    static BTreeNode* deserialize(fstream& fin, int t);
     friend class Btree;
 };
 
@@ -46,6 +49,8 @@ public:
     }
     void insert(Ciudadano* citizen);
     Ciudadano* search(int dni);
+    void serialize(const string& filename);
+    void deserialize(const string& filename);
 };
 
 BTreeNode::BTreeNode(int _t, bool _leaf){
@@ -160,6 +165,113 @@ Ciudadano* Btree::search(int dni){
         return nullptr;
     }
     return root->search(dni);
+}
+
+void leerArchivoJSON(const char* filePath, Btree& t) {
+    ifstream archivo(filePath); // Abrir el archivo
+    if (!archivo.is_open()) {
+        cout << "Error al abrir el archivo." << endl;
+        return;
+    }
+
+    string linea;
+    while (getline(archivo, linea)) { // Leer el archivo línea por línea
+        // Analizar la línea como JSON
+        size_t pos = linea.find("dni");
+        if (pos != string::npos) {
+            // Extraer el DNI y otros datos del JSON
+            int dni = stoi(linea.substr(pos + 6)); // 6 es la longitud de "dni\":"
+            getline(archivo, linea); // Leer la siguiente línea (nombre)
+            string nombre = linea.substr(linea.find(":") + 2, linea.length() - 3); // 2 y 3 son ajustes para eliminar comillas y espacios
+            nombre.erase(remove_if(nombre.begin(), nombre.end(), [](char c) { 
+                return c == '"' || c == ','; 
+            }), nombre.end());
+            getline(archivo, linea); // Leer la siguiente línea (apellido)
+            string apellido = linea.substr(linea.find(":") + 2, linea.length() - 3);
+            apellido.erase(remove_if(apellido.begin(), apellido.end(), [](char c) { 
+                return c == '"' || c == ','; 
+            }), apellido.end());
+
+            // Insertar el Ciudadano en el árbol B
+            t.insert(new Ciudadano(dni, nombre, apellido));
+        }
+    }
+
+    archivo.close(); // Cerrar el archivo
+}
+
+// Serialización de BTreeNode
+// Serialización de BTreeNode
+void BTreeNode::serialize(fstream& fout) {
+    fout.write(reinterpret_cast<char*>(&t), sizeof(t));
+    fout.write(reinterpret_cast<char*>(&n), sizeof(n));
+    fout.write(reinterpret_cast<char*>(&leaf), sizeof(leaf));
+    for (int i = 0; i < n; i++) {
+        fout.write(reinterpret_cast<char*>(&keys[i]->dni), sizeof(keys[i]->dni));
+        size_t nombreSize = keys[i]->nombre.size();
+        size_t apellidoSize = keys[i]->apellido.size();
+        fout.write(reinterpret_cast<char*>(&nombreSize), sizeof(nombreSize));
+        fout.write(keys[i]->nombre.c_str(), nombreSize);
+        fout.write(reinterpret_cast<char*>(&apellidoSize), sizeof(apellidoSize));
+        fout.write(keys[i]->apellido.c_str(), apellidoSize);
+    }
+    for (int i = 0; i <= n; i++) {
+        if (!leaf) {
+            children[i]->serialize(fout);
+        }
+    }
+}
+
+// Deserialización de BTreeNode
+BTreeNode* BTreeNode::deserialize(fstream& fin, int t) {
+    BTreeNode* node = new BTreeNode(t, true);
+    fin.read(reinterpret_cast<char*>(&node->t), sizeof(node->t));
+    fin.read(reinterpret_cast<char*>(&node->n), sizeof(node->n));
+    fin.read(reinterpret_cast<char*>(&node->leaf), sizeof(node->leaf));
+    for (int i = 0; i < node->n; i++) {
+        int dni;
+        fin.read(reinterpret_cast<char*>(&dni), sizeof(dni));
+        size_t nombreSize, apellidoSize;
+        fin.read(reinterpret_cast<char*>(&nombreSize), sizeof(nombreSize));
+        string nombre(nombreSize, ' ');
+        fin.read(&nombre[0], nombreSize);
+        fin.read(reinterpret_cast<char*>(&apellidoSize), sizeof(apellidoSize));
+        string apellido(apellidoSize, ' ');
+        fin.read(&apellido[0], apellidoSize);
+        node->keys[i] = new Ciudadano(dni, nombre, apellido);
+    }
+    if (!node->leaf) {
+        for (int i = 0; i <= node->n; i++) {
+            node->children[i] = deserialize(fin, t);
+        }
+    }
+    return node;
+}
+
+// Serialización de BTree
+void Btree::serialize(const string& filename) {
+    fstream fout(filename, ios::out | ios::binary);
+    if (fout.is_open()) {
+        fout.write(reinterpret_cast<char*>(&t), sizeof(t));
+        if (root) {
+            root->serialize(fout);
+        }
+        fout.close();
+    } else {
+        cout << "No se pudo abrir el archivo para escritura!" << endl;
+    }
+}
+
+// Deserialización de BTree
+void Btree::deserialize(const string& filename) {
+    fstream fin(filename, ios::in | ios::binary);
+    if (fin.is_open()) {
+        fin.read(reinterpret_cast<char*>(&t), sizeof(t));
+        root = BTreeNode::deserialize(fin, t);
+        fin.close();
+    } else {
+        cout << "No se pudo abrir el archivo para lectura!" << endl;
+    }
 }
 
 
@@ -296,6 +408,20 @@ char* pruebaBusqueda(int dniToSearch) {
     }
 
     return result;
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool pruebaGuardado() {
+    // Search by DNI
+    try
+    {
+        t.serialize("btree.dat");
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
 }
 
 }

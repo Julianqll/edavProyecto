@@ -15,7 +15,7 @@ var readyPromise = new Promise((resolve, reject) => {
  readyPromiseReject = reject;
 });
 
-[ "_memory", "_pruebaCreacion", "_pruebaBusqueda", "___indirect_function_table", "onRuntimeInitialized" ].forEach(prop => {
+[ "_memory", "_pruebaCreacion", "_pruebaBusqueda", "_pruebaGuardado", "___indirect_function_table", "onRuntimeInitialized" ].forEach(prop => {
  if (!Object.getOwnPropertyDescriptor(readyPromise, prop)) {
   Object.defineProperty(readyPromise, prop, {
    get: () => abort("You are getting " + prop + " on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js"),
@@ -876,123 +876,14 @@ function ___cxa_throw(ptr, type, destructor) {
  assert(false, "Exception thrown, but exception catching is not enabled. Compile with -sNO_DISABLE_EXCEPTION_CATCHING or -sEXCEPTION_CATCHING_ALLOWED=[..] to catch.");
 }
 
-var __abort_js = () => {
- abort("native code called abort()");
-};
-
-var nowIsMonotonic = 1;
-
-var __emscripten_get_now_is_monotonic = () => nowIsMonotonic;
-
-function __emscripten_memcpy_js(dest, src, num) {
- dest >>>= 0;
- src >>>= 0;
- num >>>= 0;
- return HEAPU8.copyWithin(dest >>> 0, src >>> 0, src + num >>> 0);
+/** @suppress {duplicate } */ function syscallGetVarargI() {
+ assert(SYSCALLS.varargs != undefined);
+ var ret = HEAP32[((+SYSCALLS.varargs) >>> 2) >>> 0];
+ SYSCALLS.varargs += 4;
+ return ret;
 }
 
-var _emscripten_date_now = () => Date.now();
-
-var _emscripten_get_now;
-
-_emscripten_get_now = () => performance.now();
-
-var getHeapMax = () =>  4294901760;
-
-var growMemory = size => {
- var b = wasmMemory.buffer;
- var pages = (size - b.byteLength + 65535) / 65536;
- try {
-  wasmMemory.grow(pages);
-  updateMemoryViews();
-  return 1;
- } /*success*/ catch (e) {
-  err(`growMemory: Attempted to grow heap from ${b.byteLength} bytes to ${size} bytes, but got error: ${e}`);
- }
-};
-
-function _emscripten_resize_heap(requestedSize) {
- requestedSize >>>= 0;
- var oldSize = HEAPU8.length;
- assert(requestedSize > oldSize);
- var maxHeapSize = getHeapMax();
- if (requestedSize > maxHeapSize) {
-  err(`Cannot enlarge memory, requested ${requestedSize} bytes, but the limit is ${maxHeapSize} bytes!`);
-  return false;
- }
- var alignUp = (x, multiple) => x + (multiple - x % multiple) % multiple;
- for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
-  var overGrownHeapSize = oldSize * (1 + .2 / cutDown);
-  overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296);
-  var newSize = Math.min(maxHeapSize, alignUp(Math.max(requestedSize, overGrownHeapSize), 65536));
-  var replacement = growMemory(newSize);
-  if (replacement) {
-   return true;
-  }
- }
- err(`Failed to grow the heap from ${oldSize} bytes to ${newSize} bytes, not enough memory!`);
- return false;
-}
-
-var ENV = {};
-
-var getExecutableName = () => thisProgram || "./this.program";
-
-var getEnvStrings = () => {
- if (!getEnvStrings.strings) {
-  var lang = ((typeof navigator == "object" && navigator.languages && navigator.languages[0]) || "C").replace("-", "_") + ".UTF-8";
-  var env = {
-   "USER": "web_user",
-   "LOGNAME": "web_user",
-   "PATH": "/",
-   "PWD": "/",
-   "HOME": "/home/web_user",
-   "LANG": lang,
-   "_": getExecutableName()
-  };
-  for (var x in ENV) {
-   if (ENV[x] === undefined) delete env[x]; else env[x] = ENV[x];
-  }
-  var strings = [];
-  for (var x in env) {
-   strings.push(`${x}=${env[x]}`);
-  }
-  getEnvStrings.strings = strings;
- }
- return getEnvStrings.strings;
-};
-
-var stringToAscii = (str, buffer) => {
- for (var i = 0; i < str.length; ++i) {
-  assert(str.charCodeAt(i) === (str.charCodeAt(i) & 255));
-  HEAP8[buffer++ >>> 0] = str.charCodeAt(i);
- }
- HEAP8[buffer >>> 0] = 0;
-};
-
-var _environ_get = function(__environ, environ_buf) {
- __environ >>>= 0;
- environ_buf >>>= 0;
- var bufSize = 0;
- getEnvStrings().forEach((string, i) => {
-  var ptr = environ_buf + bufSize;
-  HEAPU32[(((__environ) + (i * 4)) >>> 2) >>> 0] = ptr;
-  stringToAscii(string, ptr);
-  bufSize += string.length + 1;
- });
- return 0;
-};
-
-var _environ_sizes_get = function(penviron_count, penviron_buf_size) {
- penviron_count >>>= 0;
- penviron_buf_size >>>= 0;
- var strings = getEnvStrings();
- HEAPU32[((penviron_count) >>> 2) >>> 0] = strings.length;
- var bufSize = 0;
- strings.forEach(string => bufSize += string.length + 1);
- HEAPU32[((penviron_buf_size) >>> 2) >>> 0] = bufSize;
- return 0;
-};
+var syscallGetVarargP = syscallGetVarargI;
 
 var PATH = {
  isAbs: path => path.charAt(0) === "/",
@@ -3517,6 +3408,309 @@ var SYSCALLS = {
  }
 };
 
+function ___syscall_fcntl64(fd, cmd, varargs) {
+ varargs >>>= 0;
+ SYSCALLS.varargs = varargs;
+ try {
+  var stream = SYSCALLS.getStreamFromFD(fd);
+  switch (cmd) {
+  case 0:
+   {
+    var arg = syscallGetVarargI();
+    if (arg < 0) {
+     return -28;
+    }
+    while (FS.streams[arg]) {
+     arg++;
+    }
+    var newStream;
+    newStream = FS.dupStream(stream, arg);
+    return newStream.fd;
+   }
+
+  case 1:
+  case 2:
+   return 0;
+
+  case 3:
+   return stream.flags;
+
+  case 4:
+   {
+    var arg = syscallGetVarargI();
+    stream.flags |= arg;
+    return 0;
+   }
+
+  case 12:
+   {
+    var arg = syscallGetVarargP();
+    var offset = 0;
+    HEAP16[(((arg) + (offset)) >>> 1) >>> 0] = 2;
+    return 0;
+   }
+
+  case 13:
+  case 14:
+   return 0;
+  }
+  return -28;
+ } catch (e) {
+  if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
+  return -e.errno;
+ }
+}
+
+function ___syscall_ioctl(fd, op, varargs) {
+ varargs >>>= 0;
+ SYSCALLS.varargs = varargs;
+ try {
+  var stream = SYSCALLS.getStreamFromFD(fd);
+  switch (op) {
+  case 21509:
+   {
+    if (!stream.tty) return -59;
+    return 0;
+   }
+
+  case 21505:
+   {
+    if (!stream.tty) return -59;
+    if (stream.tty.ops.ioctl_tcgets) {
+     var termios = stream.tty.ops.ioctl_tcgets(stream);
+     var argp = syscallGetVarargP();
+     HEAP32[((argp) >>> 2) >>> 0] = termios.c_iflag || 0;
+     HEAP32[(((argp) + (4)) >>> 2) >>> 0] = termios.c_oflag || 0;
+     HEAP32[(((argp) + (8)) >>> 2) >>> 0] = termios.c_cflag || 0;
+     HEAP32[(((argp) + (12)) >>> 2) >>> 0] = termios.c_lflag || 0;
+     for (var i = 0; i < 32; i++) {
+      HEAP8[(argp + i) + (17) >>> 0] = termios.c_cc[i] || 0;
+     }
+     return 0;
+    }
+    return 0;
+   }
+
+  case 21510:
+  case 21511:
+  case 21512:
+   {
+    if (!stream.tty) return -59;
+    return 0;
+   }
+
+  case 21506:
+  case 21507:
+  case 21508:
+   {
+    if (!stream.tty) return -59;
+    if (stream.tty.ops.ioctl_tcsets) {
+     var argp = syscallGetVarargP();
+     var c_iflag = HEAP32[((argp) >>> 2) >>> 0];
+     var c_oflag = HEAP32[(((argp) + (4)) >>> 2) >>> 0];
+     var c_cflag = HEAP32[(((argp) + (8)) >>> 2) >>> 0];
+     var c_lflag = HEAP32[(((argp) + (12)) >>> 2) >>> 0];
+     var c_cc = [];
+     for (var i = 0; i < 32; i++) {
+      c_cc.push(HEAP8[(argp + i) + (17) >>> 0]);
+     }
+     return stream.tty.ops.ioctl_tcsets(stream.tty, op, {
+      c_iflag: c_iflag,
+      c_oflag: c_oflag,
+      c_cflag: c_cflag,
+      c_lflag: c_lflag,
+      c_cc: c_cc
+     });
+    }
+    return 0;
+   }
+
+  case 21519:
+   {
+    if (!stream.tty) return -59;
+    var argp = syscallGetVarargP();
+    HEAP32[((argp) >>> 2) >>> 0] = 0;
+    return 0;
+   }
+
+  case 21520:
+   {
+    if (!stream.tty) return -59;
+    return -28;
+   }
+
+  case 21531:
+   {
+    var argp = syscallGetVarargP();
+    return FS.ioctl(stream, op, argp);
+   }
+
+  case 21523:
+   {
+    if (!stream.tty) return -59;
+    if (stream.tty.ops.ioctl_tiocgwinsz) {
+     var winsize = stream.tty.ops.ioctl_tiocgwinsz(stream.tty);
+     var argp = syscallGetVarargP();
+     HEAP16[((argp) >>> 1) >>> 0] = winsize[0];
+     HEAP16[(((argp) + (2)) >>> 1) >>> 0] = winsize[1];
+    }
+    return 0;
+   }
+
+  case 21524:
+   {
+    if (!stream.tty) return -59;
+    return 0;
+   }
+
+  case 21515:
+   {
+    if (!stream.tty) return -59;
+    return 0;
+   }
+
+  default:
+   return -28;
+  }
+ }  catch (e) {
+  if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
+  return -e.errno;
+ }
+}
+
+function ___syscall_openat(dirfd, path, flags, varargs) {
+ path >>>= 0;
+ varargs >>>= 0;
+ SYSCALLS.varargs = varargs;
+ try {
+  path = SYSCALLS.getStr(path);
+  path = SYSCALLS.calculateAt(dirfd, path);
+  var mode = varargs ? syscallGetVarargI() : 0;
+  return FS.open(path, flags, mode).fd;
+ } catch (e) {
+  if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
+  return -e.errno;
+ }
+}
+
+var __abort_js = () => {
+ abort("native code called abort()");
+};
+
+var nowIsMonotonic = 1;
+
+var __emscripten_get_now_is_monotonic = () => nowIsMonotonic;
+
+function __emscripten_memcpy_js(dest, src, num) {
+ dest >>>= 0;
+ src >>>= 0;
+ num >>>= 0;
+ return HEAPU8.copyWithin(dest >>> 0, src >>> 0, src + num >>> 0);
+}
+
+var _emscripten_date_now = () => Date.now();
+
+var _emscripten_get_now;
+
+_emscripten_get_now = () => performance.now();
+
+var getHeapMax = () =>  4294901760;
+
+var growMemory = size => {
+ var b = wasmMemory.buffer;
+ var pages = (size - b.byteLength + 65535) / 65536;
+ try {
+  wasmMemory.grow(pages);
+  updateMemoryViews();
+  return 1;
+ } /*success*/ catch (e) {
+  err(`growMemory: Attempted to grow heap from ${b.byteLength} bytes to ${size} bytes, but got error: ${e}`);
+ }
+};
+
+function _emscripten_resize_heap(requestedSize) {
+ requestedSize >>>= 0;
+ var oldSize = HEAPU8.length;
+ assert(requestedSize > oldSize);
+ var maxHeapSize = getHeapMax();
+ if (requestedSize > maxHeapSize) {
+  err(`Cannot enlarge memory, requested ${requestedSize} bytes, but the limit is ${maxHeapSize} bytes!`);
+  return false;
+ }
+ var alignUp = (x, multiple) => x + (multiple - x % multiple) % multiple;
+ for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
+  var overGrownHeapSize = oldSize * (1 + .2 / cutDown);
+  overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296);
+  var newSize = Math.min(maxHeapSize, alignUp(Math.max(requestedSize, overGrownHeapSize), 65536));
+  var replacement = growMemory(newSize);
+  if (replacement) {
+   return true;
+  }
+ }
+ err(`Failed to grow the heap from ${oldSize} bytes to ${newSize} bytes, not enough memory!`);
+ return false;
+}
+
+var ENV = {};
+
+var getExecutableName = () => thisProgram || "./this.program";
+
+var getEnvStrings = () => {
+ if (!getEnvStrings.strings) {
+  var lang = ((typeof navigator == "object" && navigator.languages && navigator.languages[0]) || "C").replace("-", "_") + ".UTF-8";
+  var env = {
+   "USER": "web_user",
+   "LOGNAME": "web_user",
+   "PATH": "/",
+   "PWD": "/",
+   "HOME": "/home/web_user",
+   "LANG": lang,
+   "_": getExecutableName()
+  };
+  for (var x in ENV) {
+   if (ENV[x] === undefined) delete env[x]; else env[x] = ENV[x];
+  }
+  var strings = [];
+  for (var x in env) {
+   strings.push(`${x}=${env[x]}`);
+  }
+  getEnvStrings.strings = strings;
+ }
+ return getEnvStrings.strings;
+};
+
+var stringToAscii = (str, buffer) => {
+ for (var i = 0; i < str.length; ++i) {
+  assert(str.charCodeAt(i) === (str.charCodeAt(i) & 255));
+  HEAP8[buffer++ >>> 0] = str.charCodeAt(i);
+ }
+ HEAP8[buffer >>> 0] = 0;
+};
+
+var _environ_get = function(__environ, environ_buf) {
+ __environ >>>= 0;
+ environ_buf >>>= 0;
+ var bufSize = 0;
+ getEnvStrings().forEach((string, i) => {
+  var ptr = environ_buf + bufSize;
+  HEAPU32[(((__environ) + (i * 4)) >>> 2) >>> 0] = ptr;
+  stringToAscii(string, ptr);
+  bufSize += string.length + 1;
+ });
+ return 0;
+};
+
+var _environ_sizes_get = function(penviron_count, penviron_buf_size) {
+ penviron_count >>>= 0;
+ penviron_buf_size >>>= 0;
+ var strings = getEnvStrings();
+ HEAPU32[((penviron_count) >>> 2) >>> 0] = strings.length;
+ var bufSize = 0;
+ strings.forEach(string => bufSize += string.length + 1);
+ HEAPU32[((penviron_buf_size) >>> 2) >>> 0] = bufSize;
+ return 0;
+};
+
 function _fd_close(fd) {
  try {
   var stream = SYSCALLS.getStreamFromFD(fd);
@@ -3868,6 +4062,9 @@ function checkIncomingModuleAPI() {
 var wasmImports = {
  /** @export */ __assert_fail: ___assert_fail,
  /** @export */ __cxa_throw: ___cxa_throw,
+ /** @export */ __syscall_fcntl64: ___syscall_fcntl64,
+ /** @export */ __syscall_ioctl: ___syscall_ioctl,
+ /** @export */ __syscall_openat: ___syscall_openat,
  /** @export */ _abort_js: __abort_js,
  /** @export */ _emscripten_get_now_is_monotonic: __emscripten_get_now_is_monotonic,
  /** @export */ _emscripten_memcpy_js: __emscripten_memcpy_js,
@@ -3891,6 +4088,8 @@ var _pruebaCreacion = Module["_pruebaCreacion"] = createExportWrapper("pruebaCre
 
 var _pruebaBusqueda = Module["_pruebaBusqueda"] = createExportWrapper("pruebaBusqueda", 1);
 
+var _pruebaGuardado = Module["_pruebaGuardado"] = createExportWrapper("pruebaGuardado", 0);
+
 var _fflush = createExportWrapper("fflush", 1);
 
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports["emscripten_stack_init"])();
@@ -3909,9 +4108,9 @@ var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmE
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type", 1);
 
-var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii", 7);
-
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji", 5);
+
+var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii", 7);
 
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij", 7);
 
