@@ -364,7 +364,7 @@ void Btree::deserialize(const string& filename) {
 //    return duration.count();
 //}
 
-Btree t(70);
+Btree t(15);
 
 
 EMSCRIPTEN_KEEPALIVE
