@@ -295,8 +295,6 @@ char* pruebaBusqueda(int dniToSearch) {
         strcpy(result, "Ciudadano no encontrado");
     }
 
-    // Cleanup memory
-    delete foundCitizen;
     return result;
 }
 
