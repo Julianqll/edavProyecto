@@ -16,6 +16,7 @@ export function Menu() {
   const [cantidad, setCantidad] = useState<string | number>('');
   const [tiempo, setTiempo] = useState(0);
   const [created, setCreated] = useState(false);
+  const [guardado, setGuardado] = useState(false);
   const [dniBusqueda, setDniBusqueda] = useState<string | number>('');
   const [resultado, setResultado] = useState("");
 
@@ -43,6 +44,13 @@ export function Menu() {
         const res = core._pruebaBusqueda(dniBusqueda);
         const resultStr = core.UTF8ToString(res); // Convertir el puntero a cadena UTF-8
         setResultado(resultStr);
+    })
+  }
+
+  function handleGuardado(): void {
+    wasmModuleInstance.then((core: any) => {
+        const res = core._pruebaGuardado();
+        setGuardado(res);
     })
   }
 
@@ -127,14 +135,25 @@ export function Menu() {
             Volver
           </Button>
           {created ? 
-          <Button mt={50} size="md" radius="xl" ml={20} component={Link} to="/">
-            Guardar datos
-          </Button>
+            <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado()}>
+              Guardar datos
+            </Button>
           :
           <></>
           }
-
         </Center>   
+        <br />
+        <Center>
+          {guardado ? 
+            <Text size="lg" className={classes.description}>
+              Datos fueron guardados
+            </Text> 
+            :
+            <Text size="lg" className={classes.description}>
+              Aun no se guardan los datos
+            </Text> 
+            }
+        </Center>
         </Container>
         { resultado ? 
             <Flex

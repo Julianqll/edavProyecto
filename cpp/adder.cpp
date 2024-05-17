@@ -365,6 +365,7 @@ void Btree::deserialize(const string& filename) {
 //}
 
 Btree t(15);
+Btree t2(15);
 
 
 EMSCRIPTEN_KEEPALIVE
@@ -395,8 +396,9 @@ long long pruebaCreacion(int numElements){
 EMSCRIPTEN_KEEPALIVE
 char* pruebaBusqueda(int dniToSearch) {
     // Search by DNI
+    t2.deserialize("btree.dat");
     char* result;
-    Ciudadano* foundCitizen = t.search(dniToSearch);
+    Ciudadano* foundCitizen = t2.search(dniToSearch);
     if (foundCitizen != nullptr) {
         // Construir la cadena resultante
         string tempResult = "Ciudadano encontrado - Nombre: " + foundCitizen->nombre + ", Apellido: " + foundCitizen->apellido;
