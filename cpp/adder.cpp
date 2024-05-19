@@ -31,6 +31,7 @@ public:
     Ciudadano* search(int dni);
     void serialize(fstream& fout);
     static BTreeNode* deserialize(fstream& fin, int t);
+    void clear(); // Método para eliminar los nodos
     friend class Btree;
 };
 
@@ -51,6 +52,7 @@ public:
     Ciudadano* search(int dni);
     void serialize(const string& filename);
     void deserialize(const string& filename);
+    void clear();
 };
 
 BTreeNode::BTreeNode(int _t, bool _leaf){
@@ -274,6 +276,28 @@ void Btree::deserialize(const string& filename) {
     }
 }
 
+void BTreeNode::clear() {
+    if (!leaf) {
+        for (int i = 0; i <= n; ++i) {
+            if (children[i]) {
+                children[i]->clear();
+                delete children[i];
+            }
+        }
+    }
+    for (int i = 0; i < n; ++i) {
+        delete keys[i];
+    }
+}
+
+// Método para eliminar el árbol en la clase Btree
+void Btree::clear() {
+    if (root) {
+        root->clear();
+        delete root;
+        root = nullptr;
+    }
+}
 
 //class BTreeNode{
 //  int t, n;
@@ -364,8 +388,8 @@ void Btree::deserialize(const string& filename) {
 //    return duration.count();
 //}
 
-Btree t(15);
-Btree t2(15);
+Btree t(30);
+Btree t2(30);
 
 
 EMSCRIPTEN_KEEPALIVE
@@ -396,7 +420,9 @@ long long pruebaCreacion(int numElements){
 EMSCRIPTEN_KEEPALIVE
 char* pruebaBusqueda(int dniToSearch) {
     // Search by DNI
-    t2.deserialize("btree.dat");
+    //t.clear();
+    //cout << "arbol eliminado" << endl;
+    //t2.deserialize("btree.dat");
     char* result;
     Ciudadano* foundCitizen = t2.search(dniToSearch);
     if (foundCitizen != nullptr) {
@@ -413,15 +439,30 @@ char* pruebaBusqueda(int dniToSearch) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-bool pruebaGuardado() {
+bool pruebaGuardado(char* strfile) {
     // Search by DNI
     try
     {
+        string final = strfile;
         t.serialize("btree.dat");
         return true;
     }
     catch(const std::exception& e)
     {
+        return false;
+    }
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool pruebaCargado(char* strfile) {
+    try{
+        t.clear();
+        cout << "arbol eliminado" << endl;
+        t2.deserialize("btreeread.dat");
+        cout << "arbol desresializado" << endl;
+        return true;
+    }
+    catch(const std::exception& e){
         return false;
     }
 }

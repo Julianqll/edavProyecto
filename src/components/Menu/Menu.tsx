@@ -4,6 +4,8 @@ import WebAssemblyBinary from '../../wasm/adder_wasm.wasm?url';
 import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center } from '@mantine/core';
 import classes from './Menu.module.css';
 import { Link } from "react-router-dom";
+import { desktopDir } from "@tauri-apps/api/path";
+import { readBinaryFile, writeBinaryFile } from "@tauri-apps/api/fs";
 
 const wasmModuleInstance = WebAssemblyWrapper({
   locateFile: () =>{
@@ -47,10 +49,52 @@ export function Menu() {
     })
   }
 
-  function handleGuardado(): void {
-    wasmModuleInstance.then((core: any) => {
-        const res = core._pruebaGuardado();
-        setGuardado(res);
+  function handleGuardado(filepath:string): void {
+    wasmModuleInstance.then(async (core: any) => {
+      
+        const desktop = await desktopDir();
+        console.log(desktop);
+        const filepathc = core.stringToNewUTF8(`${desktop}/btrees/${filepath}`);
+          const res = core._pruebaGuardado(filepathc);
+          if (res) {
+            // Leer el archivo desde MEMFS
+            //const contents = await readBinaryFile('/btree.dat');
+            const fileContent = core.FS.readFile(`btree.dat`, { encoding: 'binary' });
+            console.log("good");
+            //await writeBinaryFile(filepathc, fileContent);
+            //const filecreated = core.FS.writeFile('', fileContent);
+                  // Lee el archivo desde MEMFS
+
+            // Escribe el archivo en el disco utilizando Tauri
+            await writeBinaryFile('C:/Users/user/Desktop/btrees/btree.dat', fileContent);
+
+            // Actualiza el estado con el resultado del guardado
+            setGuardado(res);
+            //const fileContent = core.FS.readFile(`btree.dat`, { encoding: 'binary' });
+    //
+            //// Crear un blob con el contenido del archivo
+            //const blob = new Blob([fileContent], { type: 'application/octet-stream' });
+    //
+            //// Crear un enlace de descarga
+            //const link = document.createElement('a');
+            //link.href = URL.createObjectURL(blob);
+            //link.download = `${desktop}/btrees/${filepath}`;
+    //
+            //// Hacer clic en el enlace para iniciar la descarga
+            //link.click();
+        } else {
+            console.error("Error al guardar el archivo en MEMFS.");
+        }
+        
+        const fileContenta =  await readBinaryFile('C:/Users/user/Desktop/btrees/btree.dat');
+
+        // Crear un archivo temporal en MEMFS para deserialización
+        core.FS.writeFile("btreeread.dat", fileContenta, { encoding: 'binary' });
+
+        // Llamar a la función de deserialización en C++
+        const filepathcnew = core.stringToNewUTF8("btreeread.dat");
+        const newres =core._pruebaCargado(filepathcnew);
+        setGuardado(newres);
     })
   }
 
@@ -135,7 +179,7 @@ export function Menu() {
             Volver
           </Button>
           {created ? 
-            <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado()}>
+            <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado("btree.dat")}>
               Guardar datos
             </Button>
           :
