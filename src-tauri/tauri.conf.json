@@ -25,6 +25,14 @@
         "copyFile": true,
         "writeFile": true,
         "scope": ["$DESKTOP/**/**"]
+      },
+      "dialog": {
+        "all": true, 
+        "ask": true,
+        "confirm": true, 
+        "message": true, 
+        "open": true, 
+        "save": true 
       }
     },
     "windows": [

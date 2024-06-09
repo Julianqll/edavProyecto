@@ -1,23 +1,53 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Text, Group, Button, rem, useMantineTheme, Flex } from '@mantine/core';
-import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
+import { Dropzone, FileWithPath } from '@mantine/dropzone';
 import { IconCloudUpload, IconX, IconDownload } from '@tabler/icons-react';
 import classes from './DropzoneButton.module.css';
 import { Link } from 'react-router-dom';
+import { open } from '@tauri-apps/api/dialog';
+// Open a selection dialog for image files
 
 export function DropzoneButton() {
   const theme = useMantineTheme();
   const openRef = useRef<() => void>(null);
+  const [files, setFiles] = useState<FileWithPath[]>([]);
+  const [result, setResult] = useState("");
+
+  useEffect(() => {
+    if (files.length > 0) {
+      handleUpload();
+    }
+  }, [files]);
+
+  const handleUpload = async () => {
+    for (const file of files) {
+      console.log(file);
+    }
+    setResult("good");
+  };
+
+  async function handleDialog(): Promise<void> {
+    const selected = await open({
+      multiple: true,
+      filters: [{
+        name: 'Image',
+        extensions: ['bin']
+      }]
+    });
+    console.log(selected);
+  }
 
   return (
     <div className={classes.wrapper}>
       <Dropzone
         openRef={openRef}
-        onDrop={() => {}}
         className={classes.dropzone}
         radius="md"
-        accept={[MIME_TYPES.pdf]}
-        maxSize={30 * 1024 ** 2}
+        accept={{
+          'application/json': ['.json'],
+          'application/octet-stream': ['.dat']
+        }}
+        onDrop={(acceptedFiles) => setFiles(acceptedFiles)}
       >
         <div style={{ pointerEvents: 'none' }}>
           <Group justify="center">
@@ -59,7 +89,8 @@ export function DropzoneButton() {
       direction="column"
       wrap="wrap"
     >
-      <Button size="md" radius="xl" onClick={() => openRef.current?.()}>
+      {result}
+      <Button size="md" radius="xl" onClick={() => handleDialog()}>
         Seleccionar archivo
       </Button>
       <Button  size="md" radius="xl" component={Link} to="/menu">

@@ -13,3 +13,12 @@
     color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3));
   }
   
+  .description {
+    color: var(--mantine-color-gray-0);
+    text-align: center;
+  
+    @media (max-width: $mantine-breakpoint-xs) {
+      font-size: var(--mantine-font-size-md);
+      text-align: left;
+    }
+  }
