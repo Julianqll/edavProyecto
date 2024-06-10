@@ -1,7 +1,7 @@
 import { useState } from "react";
 import WebAssemblyWrapper from '../../wasm/adder_wasm.js';
 import WebAssemblyBinary from '../../wasm/adder_wasm.wasm?url';
-import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center } from '@mantine/core';
+import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Group } from '@mantine/core';
 import classes from './Menu.module.css';
 import { Link } from "react-router-dom";
 import { desktopDir } from "@tauri-apps/api/path";
@@ -58,50 +58,21 @@ export function Menu() {
         wrap="wrap"
       >
         <Container>
-        {!created ? 
-          <Flex
-         mih={50}
-         gap="md"
-         justify="center"
-         align="center"
-         direction="column"
-         wrap="wrap"
-       >
- 
-         <Text size="lg" className={classes.description}>
-           Cantidad de datos
-         </Text> 
-         <NumberInput
-           variant="filled"
-           size="sm"
-           radius="md"
-           placeholder="Ingrese un número"
-           value={cantidad}
-           onChange={setCantidad}
-         />
-         <Button size="md" radius="xl" onClick={() => handleCreation()}>
-             Crear
-         </Button>
-          </Flex>  
-        :
-        <></>
-        }
         {created ? 
           <Flex
             mih={50}
-            gap="md"
+            gap="sm"
             justify="center"
             align="center"
             direction="column"
             wrap="wrap"
           >
-
             <Text size="lg" className={classes.description}>
-              Se demoró {tiempo} milisegundos en crear el arbol con {cantidad} datos.
+              El arbol fue creado en {tiempo} milisegundos
             </Text> 
             <br />
             <Text size="lg" className={classes.description}>
-              Numero de DNI a buscar
+              Ingrese el DNI del ciudadano
             </Text> 
             <NumberInput
               variant="filled"
@@ -111,9 +82,19 @@ export function Menu() {
               value={dniBusqueda}
               onChange={setDniBusqueda}
             />
-            <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
-                Buscar
-            </Button>
+            <br />
+            <Group
+            >
+              <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
+                  Buscar
+              </Button>
+              <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
+                  Agregar
+              </Button>
+              <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
+                  Eliminar
+              </Button>
+            </Group> 
           </Flex> 
         :
         <></>
