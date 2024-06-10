@@ -62,7 +62,8 @@ export function Menu() {
         top={{ base: '2.5%', md: '7%'}}
         m='2%'
         className={classes.backb} 
-        mt={50} size="md" 
+        mt={20} 
+        size="md" 
         radius="xl" 
         component={Link} 
         to="/"
