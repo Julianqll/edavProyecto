@@ -1,7 +1,7 @@
 import { useState } from "react";
 import WebAssemblyWrapper from '../../wasm/adder_wasm.js';
 import WebAssemblyBinary from '../../wasm/adder_wasm.wasm?url';
-import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Group } from '@mantine/core';
+import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Group, Box } from '@mantine/core';
 import classes from './Menu.module.css';
 import { Link } from "react-router-dom";
 import { desktopDir } from "@tauri-apps/api/path";
@@ -43,22 +43,32 @@ export function Menu() {
   }
 
   return (
-    <div className={classes.wrapper}>
-    <div className={classes.inner}>
-      <Title className={classes.title}>
-        Panel de menu
+      <Box 
+      p={50} 
+      className={classes.wrapper}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Flex
+      mih={50}
+      gap="md"
+      justify="center"
+      align="center"
+      direction="column"
+      wrap="wrap"
+    >
+      <Title mt={20} mb={50} className={classes.title}>
+        Panel de Menu
       </Title>
       <Flex
-        mt={50}
+        mb={20}
         mih={50}
-        gap="md"
+        gap={90}
         justify="center"
         align="center"
         direction="row"
-        wrap="wrap"
-      >
-        <Container>
-        {created ? 
+        wrap={{ base: 'wrap', sm: 'nowrap'}}
+        style={{ width: '100%' }}
+        >
           <Flex
             mih={50}
             gap="sm"
@@ -96,35 +106,7 @@ export function Menu() {
               </Button>
             </Group> 
           </Flex> 
-        :
-        <></>
-        }
-        <Center>
-          <Button mt={50} size="md" radius="xl" component={Link} to="/">
-            Volver
-          </Button>
-          {created ? 
-            <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado("btree.dat")}>
-              Guardar datos
-            </Button>
-          :
-          <></>
-          }
-        </Center>   
-        <br />
-        <Center>
-          {guardado ? 
-            <Text size="lg" className={classes.description}>
-              Datos fueron guardados
-            </Text> 
-            :
-            <Text size="lg" className={classes.description}>
-              Aun no se guardan los datos
-            </Text> 
-            }
-        </Center>
-        </Container>
-        { resultado ? 
+          { resultado ? 
             <Flex
             mih={50}
             gap="md"
@@ -154,8 +136,31 @@ export function Menu() {
         :
         <></>
         }
+      </Flex>
+      <Center>
+          <Button mt={50} size="md" radius="xl" component={Link} to="/">
+            Volver
+          </Button>
+          {created ? 
+            <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado("btree.dat")}>
+              Guardar datos
+            </Button>
+          :
+          <></>
+          }
+        </Center>   
+      <Center>
+          {guardado ? 
+            <Text size="lg" className={classes.description}>
+              Datos fueron guardados
+            </Text> 
+            :
+            <Text size="lg" className={classes.description}>
+              Aun no se guardan los datos
+            </Text> 
+            }
+      </Center>
     </Flex>
-    </div>
-    </div>
+    </Box>
   );
 }
