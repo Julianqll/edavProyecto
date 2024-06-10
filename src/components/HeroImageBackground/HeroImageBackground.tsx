@@ -1,7 +1,19 @@
-import { Title, Text, Container, Flex, Box, Avatar, Center, rem, Button } from '@mantine/core';
+import { Title, Flex, Box } from '@mantine/core';
 import classes from './HeroImageBackground.module.css';
-import { DropzoneButton } from '../DropzoneButton/DropzoneButton';
-import { IconFileDatabase, IconFileDescription } from '@tabler/icons-react';
+import { FileOption } from '../FileOption/FileOption';
+import { open } from '@tauri-apps/api/dialog';
+
+async function handleDialog(): Promise<void> {
+  const selected = await open({
+    multiple: true,
+    filters: [{
+      name: 'Image',
+      extensions: ['bin']
+    }]
+  });
+  console.log(selected);
+}
+
 
 export function HeroImageBackground() {
   return (
@@ -31,66 +43,8 @@ export function HeroImageBackground() {
         wrap={{ base: 'wrap', sm: 'nowrap'}}
         style={{ width: '100%' }}
         >
-          <div>
-            <Center>
-            <Avatar variant="transparent" color="blue" radius="xl" size={100}>
-              <IconFileDescription style={{ width: rem(75), height: rem(75) }} stroke={1.3}/>
-            </Avatar>
-            </Center>
-            <Flex
-              mih={50}
-              gap="md"
-              justify="center"
-              align="center"
-              direction="column"
-              wrap="wrap"
-            >
-              <Container size={640}>
-                <Title mt={20} className={classes.subtitle}>
-                  Cargar archivo de texto
-                </Title>
-                <Box maw={400}>
-                  <Text size="lg" className={classes.description}>
-                    Selecciona un archivo no procesado con los datos de los ciudadanos en formato de texto (.txt)
-                    para su procesamiento y posterior gestión en la aplicación
-                  </Text>
-                </Box>
-              </Container>
-              <Button size="md" radius="xl">
-                Seleccionar archivo
-              </Button>
-            </Flex>
-          </div>        
-          <div>
-            <Center>
-              <Avatar variant="transparent" color="blue" radius="xl" size={100}>
-                <IconFileDatabase style={{ width: rem(75), height: rem(75) }} stroke={1.3}/>
-              </Avatar>
-            </Center>
-            <Flex
-              mih={50}
-              gap="md"
-              justify="center"
-              align="center"
-              direction="column"
-              wrap="wrap"
-            >
-              <Container size={640}>
-                <Title mt={20} className={classes.subtitle}>
-                  Cargar archivo binario
-                </Title>
-                <Box maw={400}>
-                  <Text size="lg" className={classes.description}>
-                    Selecciona un archivo procesado previamente con los datos de los ciudadanos en formato binario (.bin)
-                    para gestionar los datos mediante la aplicación
-                  </Text>
-                </Box>
-              </Container>
-              <Button size="md" radius="xl">
-                Seleccionar archivo
-              </Button>
-            </Flex>
-          </div>
+          <FileOption type="text" handler={handleDialog} />
+          <FileOption type="binary" handler={handleDialog} />
       </Flex>
     </Flex>
     </Box>
