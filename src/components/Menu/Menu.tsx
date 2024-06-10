@@ -56,7 +56,20 @@ export function Menu() {
       direction="column"
       wrap="wrap"
     >
-      <Title mt={20} mb={50} className={classes.title}>
+      <Button 
+        pos='absolute' 
+        left={{ base: '14%', sm: '20%'}}
+        top={{ base: '2.5%', md: '7%'}}
+        m='2%'
+        className={classes.backb} 
+        mt={50} size="md" 
+        radius="xl" 
+        component={Link} 
+        to="/"
+      >
+        Volver
+      </Button>
+      <Title mt={50} mb={50} className={classes.title}>
         Panel de Menu
       </Title>
       <Flex
@@ -138,16 +151,10 @@ export function Menu() {
         }
       </Flex>
       <Center>
-          <Button mt={50} size="md" radius="xl" component={Link} to="/">
-            Volver
-          </Button>
-          {created ? 
-            <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado("btree.dat")}>
+
+          <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado("btree.dat")}>
               Guardar datos
             </Button>
-          :
-          <></>
-          }
         </Center>   
       <Center>
           {guardado ? 
