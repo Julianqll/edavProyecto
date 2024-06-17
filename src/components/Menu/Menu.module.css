@@ -1,23 +1,6 @@
 .wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    padding-top: rem(180px);
-    padding-bottom: rem(130px);
-    background-size: cover;
-    background: var(--mantine-color-gray-9);
-    background-position: center;
-    height: 100vh; /* Full height */
-    width: 100vw; /* Full width */
-    box-sizing: border-box; /* This ensures that padding does not add to the total height and width */
-  
-    @media (max-width: $mantine-breakpoint-xs) {
-        padding-top: rem(80px);
-        padding-bottom: rem(50px);
-    }
-  }
-  
+  background: var(--mantine-color-gray-9);
+}
   
   .inner {
     position: relative;

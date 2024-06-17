@@ -7,6 +7,7 @@ emcc -O3 ${MODULE_NAME}.cpp \
     -s EXPORT_ES6=1 \
     -s 'EXPORT_NAME="$MODULE_NAME"' \
     -s 'ENVIRONMENT="web"' \
-    -s 'EXPORTED_RUNTIME_METHODS=["UTF8ToString"]'\
+    -s 'EXPORTED_RUNTIME_METHODS=["UTF8ToString","stringToNewUTF8","FS"]'\
     -s ALLOW_MEMORY_GROWTH \
-    -s MAXIMUM_MEMORY=4294967296 
+    -s MAXIMUM_MEMORY=4294967296 \
+    -s ASSERTIONS \
