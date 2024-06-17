@@ -20,7 +20,7 @@ export function Menu() {
   const [created, setCreated] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [dniBusqueda, setDniBusqueda] = useState<string | number>('');
-  const [resultado, setResultado] = useState("");
+  const [resultado, setResultado] = useState("a");
 
   function handleCreation(): void {
     wasmModuleInstance.then((core: any) => {
@@ -126,25 +126,53 @@ export function Menu() {
             gap="md"
             justify="center"
             align="center"
-            direction="column"
+            direction="row"
             wrap="wrap"
           >
             <Container>
                 {resultado != "" ? 
                 <>
                   <Text size="lg" className={classes.description}>
-                    Resultado de la busqueda:
+                      Nombres y Apellidos
+                  </Text> 
+                  <Group mb={20}>
+                    <Text size="lg" className={classes.description}>
+                      0292039202
+                    </Text>
+                    <Text size="lg" className={classes.description}>
+                      Nacionalidad - Sexo
+                    </Text>
+                  </Group>
+                  <Text size="lg" className={classes.description}>
+                    Direccion: Ubicacion, Distrito, Ciudad
                   </Text> 
                   <Text size="lg" className={classes.description}>
-                    {resultado}
+                    Departamento, Provincia
+                  </Text>
+                  <Text size="lg" className={classes.description}>
+                    Teléfono: 93838492
+                  </Text>
+                  <Text size="lg" className={classes.description}>
+                    Correo: johndoe@example.com
+                  </Text>
+                  <Text size="lg" className={classes.description}>
+                    Estado Civil: Soltero
                   </Text>
                 </>
                 :
                 <></>
                 }
-                <Center>
-                  <Avatar variant="filled" radius={100} size={150} src="https://thispersondoesnotexist.com/" />;
-                </Center>
+            </Container>
+            <Container>
+                {resultado != "" ? 
+                <>
+                  <Center>
+                    <Avatar variant="filled" radius={100} size={150} src="https://thispersondoesnotexist.com/" />;
+                  </Center>
+                </>
+                :
+                <></>
+                }
             </Container>
           </Flex>
         :
