@@ -1,17 +1,9 @@
 import { useState } from "react";
-import WebAssemblyWrapper from '../../wasm/adder_wasm.js';
-import WebAssemblyBinary from '../../wasm/adder_wasm.wasm?url';
 import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Group, Box } from '@mantine/core';
 import classes from './Menu.module.css';
 import { Link } from "react-router-dom";
 import { desktopDir } from "@tauri-apps/api/path";
 import { readBinaryFile, writeBinaryFile } from "@tauri-apps/api/fs";
-
-const wasmModuleInstance = WebAssemblyWrapper({
-  locateFile: () =>{
-    return WebAssemblyBinary;
-  }
-})
 
 
 export function Menu() {
@@ -23,19 +15,11 @@ export function Menu() {
   const [resultado, setResultado] = useState("a");
 
   function handleCreation(): void {
-    wasmModuleInstance.then((core: any) => {
-        const res = core._pruebaCreacion(cantidad);
-        setCreated(true);
-        setTiempo(res);
-    })
+
   }
 
   function handleBusqueda(): void {
-    wasmModuleInstance.then((core: any) => {
-        const res = core._pruebaBusqueda(dniBusqueda);
-        const resultStr = core.UTF8ToString(res); // Convertir el puntero a cadena UTF-8
-        setResultado(resultStr);
-    })
+
   }
 
   function handleGuardado(filepath:string): void {
