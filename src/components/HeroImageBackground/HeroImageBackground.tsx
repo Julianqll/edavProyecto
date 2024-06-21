@@ -51,8 +51,8 @@ export function HeroImageBackground() {
           wrap={{ base: 'wrap', sm: 'nowrap'}}
           style={{ width: '100%' }}
         >
-          <FileOption type="text" handler={handleDialog('txt')} />
-          <FileOption type="binary" handler={handleDialog('bin')} />
+          <FileOption type="text" handler={handleDialog('text')} />
+          <FileOption type="binary" handler={handleDialog('binary')} />
         </Flex>
       </Flex>
     </Box>
