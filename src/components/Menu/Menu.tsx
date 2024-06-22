@@ -3,7 +3,8 @@ import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Grou
 import classes from './Menu.module.css';
 import { Link, useLocation } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
-import { createTree, deserializeTree, searchTree } from '../../services/api';
+import { createTree, deserializeTree, saveTree, searchTree } from '../../services/api';
+import { save } from "@tauri-apps/api/dialog";
 
 export function Menu() {
   const [tiempoCreado, setTiempoCreado] = useState<number | undefined>();
@@ -72,9 +73,27 @@ export function Menu() {
     setResultado('Prueba');
   }
 
-  function handleGuardado(filepath: string): void {
-    setGuardado(true);
-  }
+  const handleGuardado = async (): Promise<void> => {
+    open();
+    try {
+      const selected = await save({
+        filters: [{
+          name: 'Image',
+          extensions: ['bin']
+        }]
+      });
+      if (selected) {
+        // Llamar a la API para guardar el árbol
+        // let apiResponse = await saveTree();
+        await sleep(3000);
+        setGuardado(true);
+      }
+    } catch (error) {
+      setError('Error al guardar');
+    } finally {
+      close();
+    }
+  };
 
   return (
     <Box 
@@ -246,7 +265,7 @@ export function Menu() {
           }
         </Flex>
         <Center>
-          <Button mt={50} size="md" color="green" radius="xl" ml={20} onClick={() => handleGuardado("btree.dat")}>
+          <Button mt={50} size="md" color="green" radius="xl" ml={20} onClick={handleGuardado}>
             Guardar datos
           </Button>
         </Center>   
