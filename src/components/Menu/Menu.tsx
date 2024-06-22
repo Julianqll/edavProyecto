@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Group, Box } from '@mantine/core';
+import { useEffect, useState } from "react";
+import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Group, Box, LoadingOverlay, Loader } from '@mantine/core';
 import classes from './Menu.module.css';
-import { Link } from "react-router-dom";
-import { desktopDir } from "@tauri-apps/api/path";
-import { readBinaryFile, writeBinaryFile } from "@tauri-apps/api/fs";
-
+import { Link, useLocation } from "react-router-dom";
+import { useDisclosure } from "@mantine/hooks";
+import { createTree, deserializeTree } from '../../services/api';
 
 export function Menu() {
   const [cantidad, setCantidad] = useState<string | number>('');
@@ -13,59 +12,116 @@ export function Menu() {
   const [guardado, setGuardado] = useState(false);
   const [dniBusqueda, setDniBusqueda] = useState<string | number>('');
   const [resultado, setResultado] = useState("a");
+  const [visible, { open, close }] = useDisclosure(false);
+  const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+
+  const fetchData = async (selectedFile : string, fileType: string) => {
+    // Mostrar el overlay de carga  
+    try {
+      // Llamar al api
+      let apiResponse;
+      if (fileType === "binary"){
+      //  //apiResponse = await deserializeTree();
+      }
+      else {
+      //  //apiResponse = await createTree();
+      }
+      console.log("Llamada a API");
+    } catch (error) {
+      setError('Ocurrió un Error');
+    }
+  }; 
+
+  function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (location.state) {
+        console.log('recibidos');
+
+        if (location.state.selectedFile && location.state.fileType) {
+            open(); 
+            await sleep(3000);
+            fetchData(location.state.selectedFile, location.state.fileType);
+            close();
+        }
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+  
 
   function handleCreation(): void {
-
+    // Logic for handleCreation
   }
 
   function handleBusqueda(): void {
-
+    // Logic for handleBusqueda
   }
 
-  function handleGuardado(filepath:string): void {
+  function handleGuardado(filepath: string): void {
     setGuardado(true);
   }
 
   return (
-      <Box 
+    <Box 
+      pos="relative"
       p={50} 
       className={classes.wrapper}
       style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <Flex
-      mih={50}
-      gap="md"
-      justify="center"
-      align="center"
-      direction="column"
-      wrap="wrap"
-    >
-      <Button 
-        pos='absolute' 
-        left={{ base: '14%', sm: '20%'}}
-        top={{ base: '2.5%', md: '7%'}}
-        m='2%'
-        className={classes.backb} 
-        mt={20} 
-        size="md" 
-        radius="xl" 
-        component={Link} 
-        to="/"
-      >
-        Volver
-      </Button>
-      <Title mt={50} mb={50} className={classes.title}>
-        Panel de Menu
-      </Title>
-      <Flex
-        mb={20}
+      <LoadingOverlay  
+        visible={visible} 
+        zIndex={1000} 
+        styles={{
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          },
+        }}
+        overlayProps={{ 
+          radius: "sm", 
+          blur: 2 ,
+
+        }}
+      />      
+        <Flex
         mih={50}
-        gap={90}
+        gap="md"
         justify="center"
         align="center"
-        direction="row"
-        wrap={{ base: 'wrap', sm: 'nowrap'}}
-        style={{ width: '100%' }}
+        direction="column"
+        wrap="wrap"
+      >
+        <Button 
+          pos='absolute' 
+          left={{ base: '14%', sm: '20%'}}
+          top={{ base: '2.5%', md: '7%'}}
+          m='2%'
+          className={classes.backb} 
+          mt={20} 
+          size="md" 
+          radius="xl" 
+          component={Link} 
+          to="/"
+        >
+          Volver
+        </Button>
+        <Title mt={50} mb={50} className={classes.title}>
+          Panel de Menu
+        </Title>
+        <Flex
+          mb={20}
+          mih={50}
+          gap={90}
+          justify="center"
+          align="center"
+          direction="row"
+          wrap={{ base: 'wrap', sm: 'nowrap'}}
+          style={{ width: '100%' }}
         >
           <Flex
             mih={50}
@@ -91,85 +147,83 @@ export function Menu() {
               onChange={setDniBusqueda}
             />
             <br />
-            <Group
-            >
+            <Group>
               <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
-                  Buscar
+                Buscar
               </Button>
               <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
-                  Agregar
+                Agregar
               </Button>
               <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
-                  Eliminar
+                Eliminar
               </Button>
             </Group> 
           </Flex> 
           { resultado ? 
             <Flex
-            mih={50}
-            gap="md"
-            justify="center"
-            align="center"
-            direction="row"
-            wrap="wrap"
-          >
-            <Container>
-                {resultado != "" ? 
-                <>
-                  <Text size="lg" className={classes.description}>
+              mih={50}
+              gap="md"
+              justify="center"
+              align="center"
+              direction="row"
+              wrap="wrap"
+            >
+              <Container>
+                {resultado !== "" ? 
+                  <>
+                    <Text size="lg" className={classes.description}>
                       Nombres y Apellidos
-                  </Text> 
-                  <Group mb={20}>
+                    </Text> 
+                    <Group mb={20}>
+                      <Text size="lg" className={classes.description}>
+                        0292039202
+                      </Text>
+                      <Text size="lg" className={classes.description}>
+                        Nacionalidad - Sexo
+                      </Text>
+                    </Group>
                     <Text size="lg" className={classes.description}>
-                      0292039202
+                      Direccion: Ubicacion, Distrito, Ciudad
+                    </Text> 
+                    <Text size="lg" className={classes.description}>
+                      Departamento, Provincia
                     </Text>
                     <Text size="lg" className={classes.description}>
-                      Nacionalidad - Sexo
+                      Teléfono: 93838492
                     </Text>
-                  </Group>
-                  <Text size="lg" className={classes.description}>
-                    Direccion: Ubicacion, Distrito, Ciudad
-                  </Text> 
-                  <Text size="lg" className={classes.description}>
-                    Departamento, Provincia
-                  </Text>
-                  <Text size="lg" className={classes.description}>
-                    Teléfono: 93838492
-                  </Text>
-                  <Text size="lg" className={classes.description}>
-                    Correo: johndoe@example.com
-                  </Text>
-                  <Text size="lg" className={classes.description}>
-                    Estado Civil: Soltero
-                  </Text>
-                </>
-                :
-                <></>
+                    <Text size="lg" className={classes.description}>
+                      Correo: johndoe@example.com
+                    </Text>
+                    <Text size="lg" className={classes.description}>
+                      Estado Civil: Soltero
+                    </Text>
+                  </>
+                  :
+                  null
                 }
-            </Container>
-            <Container>
-                {resultado != "" ? 
-                <>
-                  <Center>
-                    <Avatar variant="filled" radius={100} size={150} src="https://thispersondoesnotexist.com/" />;
-                  </Center>
-                </>
-                :
-                <></>
+              </Container>
+              <Container>
+                {resultado !== "" ? 
+                  <>
+                    <Center>
+                      <Avatar variant="filled" radius={100} size={150} src="https://thispersondoesnotexist.com/" />
+                    </Center>
+                  </>
+                  :
+                  null
                 }
-            </Container>
-          </Flex>
-        :
-        <></>
-        }
-      </Flex>
-      <Center>
-
-          <Button mt={50} size="md" radius="xl" ml={20}  onClick={() => handleGuardado("btree.dat")}>
-              Guardar datos
-            </Button>
+              </Container>
+            </Flex>
+            :
+            null
+          }
+        </Flex>
+        <Center>
+          <Button mt={50} size="md" radius="xl" ml={20} onClick={() => handleGuardado("btree.dat")}>
+            Guardar datos
+          </Button>
         </Center>   
-      <Center>
+        <Center>
           {guardado ? 
             <Text size="lg" className={classes.description}>
               Datos fueron guardados
@@ -178,9 +232,9 @@ export function Menu() {
             <Text size="lg" className={classes.description}>
               Aun no se guardan los datos
             </Text> 
-            }
-      </Center>
-    </Flex>
+          }
+        </Center>
+      </Flex>
     </Box>
   );
 }

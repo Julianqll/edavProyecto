@@ -13,3 +13,14 @@ export const createTree = async () => {
     throw error;
   }
 };
+
+export const deserializeTree = async () => {
+  try {
+    const response = await api.get('/open');
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
