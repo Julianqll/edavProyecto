@@ -6,12 +6,17 @@ import { useDisclosure } from "@mantine/hooks";
 import { createTree, deserializeTree } from '../../services/api';
 
 export function Menu() {
+  const [tiempoCreado, setTiempoCreado] = useState<number | undefined>();
+  const [tiempoLeido, setTiempoLeido] = useState<number | undefined>();
+
+  const [tiempoCargado, setTiempoCargado] = useState<number | undefined>();
+
   const [cantidad, setCantidad] = useState<string | number>('');
   const [tiempo, setTiempo] = useState(0);
   const [created, setCreated] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [dniBusqueda, setDniBusqueda] = useState<string | number>('');
-  const [resultado, setResultado] = useState("a");
+  const [resultado, setResultado] = useState("");
   const [visible, { open, close }] = useDisclosure(false);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
@@ -23,9 +28,13 @@ export function Menu() {
       let apiResponse;
       if (fileType === "binary"){
       //  //apiResponse = await deserializeTree();
+      setTiempoCargado(5);
       }
       else {
       //  //apiResponse = await createTree();
+      // actualiza estados con respuesta
+        setTiempoLeido(5);
+        setTiempoCreado(5);
       }
       console.log("Llamada a API");
     } catch (error) {
@@ -131,9 +140,27 @@ export function Menu() {
             direction="column"
             wrap="wrap"
           >
-            <Text size="lg" className={classes.description}>
-              El arbol fue creado en {tiempo} milisegundos
-            </Text> 
+            {tiempoCargado != null ? 
+              <>
+                <Text size="lg" className={classes.description}>
+                  El arbol fue cargado en {tiempoCargado} milisegundos
+                </Text> 
+              </>
+              :
+              <></>
+            }   
+            {tiempoCreado != null ? 
+              <>
+                <Text size="lg" className={classes.description}>
+                  El archivo fue leído en {tiempoLeido} milisegundos
+                </Text> 
+                <Text size="lg" className={classes.description}>
+                  El arbol fue creado en {tiempoCreado} milisegundos
+                </Text> 
+              </>
+              :
+              <></>
+            }
             <br />
             <Text size="lg" className={classes.description}>
               Ingrese el DNI del ciudadano
@@ -151,10 +178,10 @@ export function Menu() {
               <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
                 Buscar
               </Button>
-              <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
+              <Button size="md" color="yellow" radius="xl" onClick={() => handleBusqueda()}>
                 Agregar
               </Button>
-              <Button size="md" radius="xl" onClick={() => handleBusqueda()}>
+              <Button size="md" color="red" radius="xl" onClick={() => handleBusqueda()}>
                 Eliminar
               </Button>
             </Group> 
@@ -219,7 +246,7 @@ export function Menu() {
           }
         </Flex>
         <Center>
-          <Button mt={50} size="md" radius="xl" ml={20} onClick={() => handleGuardado("btree.dat")}>
+          <Button mt={50} size="md" color="green" radius="xl" ml={20} onClick={() => handleGuardado("btree.dat")}>
             Guardar datos
           </Button>
         </Center>   
