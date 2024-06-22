@@ -24,3 +24,23 @@ export const deserializeTree = async () => {
   }
 };
 
+
+export const saveTree = async () => {
+  try {
+    const response = await api.get('/save');
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+export const search = async (dni: string) => {
+  try {
+    const response = await api.get(`/search?dni=${dni}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
