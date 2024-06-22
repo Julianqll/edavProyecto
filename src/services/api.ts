@@ -35,7 +35,7 @@ export const saveTree = async () => {
   }
 };
 
-export const search = async (dni: string) => {
+export const searchTree = async (dni: string) => {
   try {
     const response = await api.get(`/search?dni=${dni}`);
     return response;

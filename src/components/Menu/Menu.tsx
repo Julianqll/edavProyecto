@@ -3,7 +3,7 @@ import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Grou
 import classes from './Menu.module.css';
 import { Link, useLocation } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
-import { createTree, deserializeTree } from '../../services/api';
+import { createTree, deserializeTree, searchTree } from '../../services/api';
 
 export function Menu() {
   const [tiempoCreado, setTiempoCreado] = useState<number | undefined>();
@@ -11,12 +11,14 @@ export function Menu() {
 
   const [tiempoCargado, setTiempoCargado] = useState<number | undefined>();
 
-  const [cantidad, setCantidad] = useState<string | number>('');
-  const [tiempo, setTiempo] = useState(0);
-  const [created, setCreated] = useState(false);
-  const [guardado, setGuardado] = useState(false);
   const [dniBusqueda, setDniBusqueda] = useState<string | number>('');
-  const [resultado, setResultado] = useState("");
+  const [resultado, setResultado] = useState<string | null>("");
+
+  //falta para agregar
+  //falta para eliminar
+
+  const [guardado, setGuardado] = useState(false);
+
   const [visible, { open, close }] = useDisclosure(false);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
@@ -25,7 +27,7 @@ export function Menu() {
     // Mostrar el overlay de carga  
     try {
       // Llamar al api
-      let apiResponse;
+      //let apiResponse;
       if (fileType === "binary"){
       //  //apiResponse = await deserializeTree();
       setTiempoCargado(5);
@@ -64,12 +66,10 @@ export function Menu() {
   }, []);
   
 
-  function handleCreation(): void {
-    // Logic for handleCreation
-  }
-
-  function handleBusqueda(): void {
-    // Logic for handleBusqueda
+  async function handleBusqueda(): Promise<void> {
+    //let apiResponse = await searchTree(String(dniBusqueda));
+    console.log(dniBusqueda);
+    setResultado('Prueba');
   }
 
   function handleGuardado(filepath: string): void {
