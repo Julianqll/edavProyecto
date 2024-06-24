@@ -13,7 +13,7 @@ export function HeroImageBackground() {
         multiple: true,
         filters: [{
           name: 'Image',
-          extensions: [type == 'binary' ? 'bin' : 'txt']
+          extensions: [type == 'binary' ? 'bin' : 'zst']
         }]
       });
       if (selected && selected.length > 0) {

@@ -19,7 +19,7 @@ export function FileOption({ type, handler }: FileOptionProps) {
   } else if (type === 'text') {
     iconHeader = <IconFileDescription style={{ width: rem(75), height: rem(75) }} stroke={1.3} />;
     subtitle = "Cargar archivo de texto";
-    description = "Selecciona un archivo no procesado con los datos de los ciudadanos en formato de texto (.txt) para su procesamiento y posterior gestión en la aplicación";
+    description = "Selecciona un archivo no procesado con los datos de los ciudadanos en formato de texto (.txt/.zst) para su procesamiento y posterior gestión en la aplicación";
   }
 
   return (
