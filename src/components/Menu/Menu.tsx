@@ -24,6 +24,21 @@ export function Menu() {
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
 
+
+  const convertToWslPath = (windowsPath: string): string => {
+    // Reemplazar los backslashes por slashes
+    let wslPath = windowsPath.replace(/\\/g, '/');
+    
+    // Extraer la unidad de la ruta y convertirla al formato WSL
+    const driveLetterMatch = wslPath.match(/^([a-zA-Z]):/);
+    if (driveLetterMatch) {
+      const driveLetter = driveLetterMatch[1].toLowerCase();
+      wslPath = wslPath.replace(/^([a-zA-Z]):/, `/mnt/${driveLetter}`);
+    }
+  
+    return wslPath;
+  };
+  
   const fetchData = async (selectedFile : string, fileType: string) => {
     // Mostrar el overlay de carga  
     try {
