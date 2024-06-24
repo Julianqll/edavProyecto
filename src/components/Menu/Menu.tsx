@@ -3,7 +3,7 @@ import { Title, Text, Button, Flex, NumberInput, Container, Avatar, Center, Grou
 import classes from './Menu.module.css';
 import { Link, useLocation } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
-import { createTree, deserializeTree, saveTree, searchTree } from '../../services/api';
+import { createTree, openTree, saveTree, searchTree } from '../../services/api';
 import { save } from "@tauri-apps/api/dialog";
 
 export function Menu() {
